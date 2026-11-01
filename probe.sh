@@ -25,9 +25,11 @@ for host in 10.253.77.20 10.253.78.20 10.253.79.20 10.253.80.20; do
     for port in 2375 1234 5000 8000 8080 5432 6379; do blocked "$host" "$port"; done
 done
 route_mode=denied
+forwarding=not_exercised
 if /bin/busybox ip route add 10.253.78.0/24 via 10.253.77.20 2>/dev/null; then
     route_mode=attempted
+    forwarding=blocked
     blocked 10.253.78.30 5432
     /bin/busybox ip route del 10.253.78.0/24 via 10.253.77.20
 fi
-printf '{"origin":"actual_buildkit_run","mirror_positive":true,"package_positive":true,"route_mode":"%s","targets":{"postgres":"blocked","redis":"blocked","launcher":"blocked","registry":"blocked","restart_gate":"blocked","docker_api":"blocked","host_gateway":"blocked","metadata_endpoint":"blocked","direct_public_egress":"blocked","worker_proxy":"blocked","worker_forwarding":"blocked"}}\n' "$route_mode" > /www/probe.json
+printf '{"origin":"actual_buildkit_run","mirror_positive":true,"package_positive":true,"route_mode":"%s","targets":{"postgres":"blocked","redis":"blocked","launcher":"blocked","registry":"blocked","restart_gate":"blocked","docker_api":"blocked","host_gateway":"blocked","metadata_endpoint":"blocked","direct_public_egress":"blocked","worker_proxy":"blocked","worker_forwarding":"%s"}}\n' "$route_mode" "$forwarding" > /www/probe.json
